@@ -1,0 +1,39 @@
+name: Static analysis
+on: [push, pull_request]
+
+jobs:
+  php-cs-fixer:
+    name: PHP-CS-Fixer
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.1
+
+      - name: Get Composer Cache Directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: 8-1-composer-${{ hashFiles('**/composer.json') }}
+          restore-keys: 8-1-composer-
+
+      - name: Update project dependencies
+        run: composer update --no-progress --ansi --prefer-stable
+
+      - name: Validate composer
+        run: composer validate --strict --no-check-lock
+
+      - name: Prepare PHP-CS-Fixer config
+        run: cp .php-cs-fixer.dist.php .php-cs-fixer.php
+
+      - name: PHP-CS-Fixer
+        run: vendor/bin/php-cs-fixer check -vv
