@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BCC\AutoMapperBundle;
 
 use BCC\AutoMapperBundle\DependencyInjection\Compiler\MapPass;

@@ -14,6 +14,9 @@ phpunit: $(PHP_CONSOLE_DEPS)
 	@$(PHP) vendor/bin/phpunit --color=always
 
 php-cs: $(PHP_CONSOLE_DEPS)
-	@$(PHP) vendor/bin/php-cs-fixer check -vv
+	@$(PHP) vendor/bin/php-cs-fixer fix
+
+phpstan: $(PHP_CONSOLE_DEPS)
+	@$(PHP) vendor/bin/phpstan analyse
 
 check: php-cs phpunit

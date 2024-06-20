@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BCC\AutoMapperBundle\Tests\Mapper\FieldAccessor;
 
 use BCC\AutoMapperBundle\Mapper\Exception\InvalidSourceProperty;

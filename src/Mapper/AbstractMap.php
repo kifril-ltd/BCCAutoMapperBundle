@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BCC\AutoMapperBundle\Mapper;
 
+use BCC\AutoMapperBundle\Mapper\AfterMapper\AfterMapperInterface;
 use BCC\AutoMapperBundle\Mapper\FieldAccessor\FieldAccessorInterface;
 use BCC\AutoMapperBundle\Mapper\FieldAccessor\Simple;
 use BCC\AutoMapperBundle\Mapper\FieldFilter\FieldFilterInterface;
@@ -13,34 +16,48 @@ use BCC\AutoMapperBundle\Mapper\FieldFilter\FieldFilterInterface;
  */
 abstract class AbstractMap implements MapInterface
 {
-    protected $fieldAccessors = [];
-    protected $fieldFilters = [];
-    protected $overwriteIfSet = true;
-    protected $skipNull = false;
+    /** @var FieldAccessorInterface[] */
+    protected array $fieldAccessors = [];
+    /** @var FieldFilterInterface[] */
+    protected array $fieldFilters = [];
+    /** @var array<string,string> */
+    protected array $fieldRoutes = [];
+    protected bool $overwriteIfSet = true;
+    protected bool $skipNull = false;
+    protected bool $skipNonExists = false;
+    /** @var AfterMapperInterface[] */
+    protected array $afterMappers = [];
+
+    public function buildDefaultMap(): self
+    {
+        $reflectionClass = new \ReflectionClass($this->getDestinationType());
+
+        foreach ($reflectionClass->getProperties() as $property) {
+            $this->fieldAccessors[$property->name] = new Simple(
+                $this->getCorrectPropertyPath($property->name)
+            );
+        }
+
+        return $this;
+    }
 
     /**
      * Associate a member to another member given their property pathes.
-     *
-     * @param string $destinationMember
-     * @param string $sourceMember
-     *
-     * @return AbstractMap
      */
-    public function route($destinationMember, $sourceMember)
+    public function route(string $destinationMember, string $sourceMember): self
     {
-        $this->fieldAccessors[$destinationMember] = new Simple($sourceMember);
+        $this->fieldAccessors[$destinationMember] = new Simple(
+            $this->getCorrectPropertyPath($sourceMember)
+        );
+        $this->fieldRoutes[$destinationMember] = $sourceMember;
 
         return $this;
     }
 
     /**
      * Applies a field accessor policy to a member.
-     *
-     * @param string $destinationMember
-     *
-     * @return AbstractMap
      */
-    public function forMember($destinationMember, FieldAccessorInterface $fieldMapper)
+    public function forMember(string $destinationMember, FieldAccessorInterface $fieldMapper): self
     {
         $this->fieldAccessors[$destinationMember] = $fieldMapper;
 
@@ -49,10 +66,8 @@ abstract class AbstractMap implements MapInterface
 
     /**
      * Applies a filter to the field.
-     *
-     * @param string $destinationMember
      */
-    public function filter($destinationMember, FieldFilterInterface $fieldFilter)
+    public function filter(string $destinationMember, FieldFilterInterface $fieldFilter): self
     {
         $this->fieldFilters[$destinationMember] = $fieldFilter;
 
@@ -61,81 +76,87 @@ abstract class AbstractMap implements MapInterface
 
     /**
      * Sets whether to skip the source value if it is null.
-     *
-     * @return AbstractMap
      */
-    public function setSkipNull($value)
+    public function setSkipNull(bool $value): self
     {
-        $this->skipNull = (bool) $value;
+        $this->skipNull = $value;
 
         return $this;
     }
 
-    /**
-     * @return bool
-     */
-    public function getSkipNull()
+    public function getSkipNull(): bool
     {
         return $this->skipNull;
     }
 
-    /**
-     * Sets whether to overwrite the destination value if it is already set.
-     *
-     * @return AbstractMap
-     */
-    public function setOverwriteIfSet($value)
+    public function setSkipNonExists(bool $value): self
     {
-        $this->overwriteIfSet = (bool) $value;
+        $this->skipNonExists = $value;
 
         return $this;
     }
 
+    public function getSkipNonExists(): bool
+    {
+        return $this->skipNonExists;
+    }
+
     /**
-     * @return bool
+     * Sets whether to overwrite the destination value if it is already set.
      */
-    public function getOverwriteIfSet()
+    public function setOverwriteIfSet(bool $value): self
+    {
+        $this->overwriteIfSet = $value;
+
+        return $this;
+    }
+
+    public function getOverwriteIfSet(): bool
     {
         return $this->overwriteIfSet;
     }
 
     /**
-     * Builds the default map using property names.
-     *
-     * @return AbstractMap
-     */
-    public function buildDefaultMap()
-    {
-        $reflectionClass = new \ReflectionClass($this->getDestinationType());
-
-        foreach ($reflectionClass->getProperties() as $property) {
-            $this->fieldAccessors[$property->name] = new Simple($property->name);
-        }
-
-        return $this;
-    }
-
-    /**
      * Ignore the destination field.
-     *
-     * @param string $destinationMember
-     *
-     * @return AbstractMap
      */
-    public function ignoreMember($destinationMember)
+    public function ignoreMember(string $destinationMember): self
     {
         unset($this->fieldAccessors[$destinationMember]);
 
         return $this;
     }
 
-    public function getFieldAccessors()
+    public function getFieldAccessors(): array
     {
         return $this->fieldAccessors;
     }
 
-    public function getFieldFilters()
+    public function getFieldFilters(): array
     {
         return $this->fieldFilters;
+    }
+
+    public function addAfterMapper(AfterMapperInterface $afterMapper): self
+    {
+        $this->afterMappers[] = $afterMapper;
+
+        return $this;
+    }
+
+    /** @return AfterMapperInterface[] */
+    public function getAfterMappers(): array
+    {
+        return $this->afterMappers;
+    }
+
+    /** @return array<string,string> */
+    public function getFieldRoutes(): array
+    {
+        return $this->fieldRoutes;
+    }
+
+    private function getCorrectPropertyPath(string $name): string
+    {
+        return 'array' === $this->getSourceType() ? '[' . $name . ']' : $name;
     }
 }

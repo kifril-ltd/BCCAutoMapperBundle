@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BCC\AutoMapperBundle\Mapper\FieldAccessor;
 
 /**
@@ -9,20 +11,12 @@ namespace BCC\AutoMapperBundle\Mapper\FieldAccessor;
  */
 class Closure implements FieldAccessorInterface
 {
-    /**
-     * @var \Closure
-     */
-    private $closure;
-
-    /**
-     * @param $closure The closure
-     */
-    public function __construct(\Closure $closure)
+    public function __construct(private \Closure $closure)
     {
         $this->closure = $closure;
     }
 
-    public function getValue($source)
+    public function getValue(mixed $source): mixed
     {
         $closure = $this->closure;
 

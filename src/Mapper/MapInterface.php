@@ -1,7 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BCC\AutoMapperBundle\Mapper;
 
+use BCC\AutoMapperBundle\Mapper\AfterMapper\AfterMapperInterface;
 use BCC\AutoMapperBundle\Mapper\FieldAccessor\FieldAccessorInterface;
 use BCC\AutoMapperBundle\Mapper\FieldFilter\FieldFilterInterface;
 
@@ -15,20 +18,32 @@ interface MapInterface
     /**
      * @return FieldAccessorInterface[] An array of field accessors
      */
-    public function getFieldAccessors();
+    public function getFieldAccessors(): array;
 
     /**
      * @return FieldFilterInterface[] An array of field filters
      */
-    public function getFieldFilters();
+    public function getFieldFilters(): array;
 
     /**
-     * @return string The source type
+     * The source type
      */
-    public function getSourceType();
+    public function getSourceType(): string;
 
     /**
-     * @return string The destination type
+     * The destination type
      */
-    public function getDestinationType();
+    public function getDestinationType(): string;
+
+    /** @return array<string,string> */
+    public function getFieldRoutes(): array;
+
+    public function getSkipNull(): bool;
+
+    public function getSkipNonExists(): bool;
+
+    public function getOverwriteIfSet(): bool;
+
+    /** @return AfterMapperInterface[] */
+    public function getAfterMappers(): array;
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BCC\AutoMapperBundle\DependencyInjection\Compiler;
 
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BCC\AutoMapperBundle\Mapper\FieldFilter;
 
 use BCC\AutoMapperBundle\Mapper\Mapper;
@@ -11,33 +13,21 @@ use BCC\AutoMapperBundle\Mapper\Mapper;
  */
 abstract class AbstractMappingFilter implements FieldFilterInterface
 {
-    /** @var Mapper */
-    private $mapper;
-    /** @var string */
-    protected $className;
+    private Mapper $mapper;
 
     /**
      * AbstractMappingFilter constructor.
-     *
-     * @param string $className
      */
-    public function __construct($className)
+    public function __construct(protected string $className)
     {
-        $this->className = $className;
     }
 
-    /**
-     * @return Mapper
-     */
-    protected function getMapper()
+    protected function getMapper(): Mapper
     {
         return $this->mapper;
     }
 
-    /**
-     * @param Mapper $mapper
-     */
-    public function setMapper($mapper): void
+    public function setMapper(Mapper $mapper): void
     {
         $this->mapper = $mapper;
     }

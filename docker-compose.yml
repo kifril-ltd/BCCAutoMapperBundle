@@ -6,3 +6,5 @@ services:
         PHP_IMAGE_TAG: ${PHP_IMAGE_TAG:-8.1}
     volumes:
       - "./:/var/www/automapper"
+    environment:
+      PHP_INI_SCAN_DIR: "/usr/local/etc/php/debug_conf.d"

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace BCC\AutoMapperBundle\Tests\Fixtures;
 
 use BCC\AutoMapperBundle\Mapper\AbstractMap;
@@ -15,12 +17,12 @@ class PostMap extends AbstractMap
         $this->route('title', 'name');
     }
 
-    public function getDestinationType()
+    public function getDestinationType(): string
     {
         return 'BCC\AutoMapperBundle\Tests\Fixtures\DestinationPost';
     }
 
-    public function getSourceType()
+    public function getSourceType(): string
     {
         return 'BCC\AutoMapperBundle\Tests\Fixtures\SourcePost';
     }

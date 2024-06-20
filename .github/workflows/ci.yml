@@ -1,5 +1,5 @@
 name: Test
-on: [push, pull_request]
+on: [ push, pull_request ]
 
 jobs:
   tests:
@@ -31,8 +31,6 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: pcov
-          tools: flex
 
       - name: Configure Symfony
         run: composer config extra.symfony.require "${{ matrix.symfony }}"
@@ -53,9 +51,6 @@ jobs:
 
       - name: Validate composer
         run: composer validate --strict --no-check-lock
-
-      - name: Prepare PHPUnit config
-        run: cp phpunit.xml.dist phpunit.xml
 
       - name: Run tests
         run: vendor/bin/phpunit
